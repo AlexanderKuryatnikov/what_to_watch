@@ -1,5 +1,6 @@
 from datetime import datetime
 from flask import Flask, abort, flash, redirect, render_template, url_for
+from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
 from random import randrange
@@ -13,6 +14,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'MY SECRET KEY'
 
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 
 class Opinion(db.Model):
@@ -28,6 +30,7 @@ class Opinion(db.Model):
     # Дата и время — текущее время,
     # по этому столбцу база данных будет проиндексирована
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    added_by = db.Column(db.String(64))
 
 
 class OpinionForm(FlaskForm):
