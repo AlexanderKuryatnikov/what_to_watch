@@ -1,3 +1,5 @@
+import csv
+import click
 from datetime import datetime
 from flask import Flask, abort, flash, redirect, render_template, url_for
 from flask_migrate import Migrate
@@ -48,6 +50,27 @@ class OpinionForm(FlaskForm):
         validators=[Length(1, 256), Optional()]
     )
     submit = SubmitField('Добавить')
+
+
+@app.cli.command('load_opinions')
+def load_opinions_command():
+    """Функция загрузки мнений в базу данных."""
+    # Открывается файл
+    with open('opinions.csv', encoding='utf-8') as f:
+        # Создаётся итерируемый объект, который отображает каждую строку
+        # в качестве словаря с ключами из шапки файла
+        reader = csv.DictReader(f)
+        # Для подсчёта строк добавляется счётчик
+        counter = 0
+        for row in reader:
+            # Распакованный словарь можно использовать
+            # для создания объекта мнения
+            opinion = Opinion(**row)
+            # Изменения нужно зафиксировать
+            db.session.add(opinion)
+            db.session.commit()
+            counter += 1
+    click.echo(f'Загружено мнений: {counter}')
 
 
 # Тут декорируется обработчик и указывается код нужной ошибки
